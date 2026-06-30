@@ -123,12 +123,15 @@
 </head>
 <body>
 
+    <!-- Left Side Menu -->
     <div class="left-panel">
         <div class="channel-group" id="buttonArea"></div>
         <button class="toggle-btn" onclick="toggleRightPanel()">💬 Widgets: ON</button>
     </div>
 
+    <!-- Right Side Sidebar Container -->
     <div class="right-panel" id="rightSidebar">
+        <!-- Notice Box -->
         <div class="info-box">
             <div class="box-header">🔔 Live Update:</div>
             <div class="marquee-box">
@@ -136,19 +139,21 @@
             </div>
         </div>
 
+        <!-- AI Summary Box -->
         <div class="info-box" style="border-color: #00ffcc;">
             <div class="box-header" style="color: #00ffcc;">🤖 AI Live Summary:</div>
-            <div class="ai-content" id="aiSummaryBox">Select a channel to generate live program/match summary updates...</div>
+            <div class="ai-content" id="aiSummaryBox">চ্যানেল সিলেক্ট করলে AI লাইভ আপডেট এখানে দেখাবে...</div>
         </div>
     </div>
 
+    <!-- Video Player Area -->
     <div class="player-container">
         <iframe id="tvPlayer" allow="autoplay; encrypted-media" src=""></iframe>
     </div>
 
     <script>
-        // Apnar active AIzaSy API key ekhane set kora holo
-        const GEMINI_API_KEY = "AIzaSyCQ-_ah9kGd3Q3dQkSrchVLqUXQzx1-r7o";
+        // Groq API Key সেট করা হলো
+        const GROQ_API_KEY = "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";
 
         // Channel Data List
         const channels = [
@@ -182,31 +187,37 @@
             buttonArea.appendChild(btn);
         });
 
-        // Gemini API dynamic call function
+        // Groq Cloud API Call (Super Fast & Vercel Compatible)
         async function getAiSummary(channelName) {
             const aiBox = document.getElementById('aiSummaryBox');
-            aiBox.innerHTML = "⏳ <i>AI scanning program data...</i>";
+            aiBox.innerHTML = "⏳ <i>AI তথ্য স্ক্যান করছে...</i>";
 
-            // Optimize prompt to reply shortly in BANGLA
-            const prompt = `Give a very brief current program guide, live match preview, or active tournament stats/news for the TV channel: "${channelName}". Respond strictly in Bangla language, very short (maximum 2 lines), casual and clean text.`;
+            const prompt = `Give a very brief current program guide, show preview, or active tournament updates for the TV channel: "${channelName}". Reply strictly in Bengali language, extremely short (maximum 1-2 lines), clean text, and informal.`;
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    headers: {
+                        "Authorization": `Bearer ${GROQ_API_KEY}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "llama-3.3-7b-versatile",
+                        messages: [{ role: "user", content: prompt }],
+                        max_tokens: 100
+                    })
                 });
                 
                 const data = await response.json();
                 
-                if (data.candidates && data.candidates[0].content.parts[0].text) {
-                    const aiResponseText = data.candidates[0].content.parts[0].text;
-                    aiBox.innerText = aiResponseText;
+                if (data.choices && data.choices[0].message.content) {
+                    aiBox.innerText = data.choices[0].message.content;
                 } else {
-                    aiBox.innerText = "⚠️ Response error. Click again.";
+                    aiBox.innerText = "⚠️ এআই সাড়া দিচ্ছে না। আবার চেষ্টা করুন।";
                 }
             } catch (error) {
-                aiBox.innerText = "⚠️ Verification failed. Check key config.";
+                console.error(error);
+                aiBox.innerText = "⚠️ লাইভ এআই সামারি লোড করা যায়নি।";
             }
         }
 
