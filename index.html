@@ -5,20 +5,107 @@
     <title>My Live TV Dashboard</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: sans-serif; }
-        .left-panel { position: absolute; top: 15px; left: 15px; z-index: 9999; background: rgba(0,0,0,0.7); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 10px; max-height: 90vh; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); }
-        .channel-group { display: flex; flex-direction: column; gap: 8px; }
-        button { padding: 10px 20px; font-size: 15px; cursor: pointer; border-radius: 5px; background: #ff0000; color: white; border: none; font-weight: bold; text-align: left; width: 140px; transition: all 0.2s ease; }
+        
+        /* Left Column: Button container top-left e thakbe */
+        .left-panel { 
+            position: absolute; 
+            top: 15px; 
+            left: 15px; 
+            z-index: 9999; 
+            background: rgba(0,0,0,0.7); 
+            padding: 12px; 
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column; 
+            gap: 10px; 
+            max-height: 90vh; 
+            overflow-y: auto;  
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .channel-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        button { 
+            padding: 10px 20px; 
+            font-size: 15px; 
+            cursor: pointer; 
+            border-radius: 5px; 
+            background: #ff0000; 
+            color: white; 
+            border: none; 
+            font-weight: bold; 
+            text-align: left; 
+            width: 140px; 
+            transition: all 0.2s ease;
+        }
+        
         button:hover { background: #cc0000; }
         button.active { background: #008000; } 
-        .toggle-btn { background: #333; border: 1px solid #555; text-align: center; font-size: 13px; padding: 8px 10px; margin-top: 5px; color: white; }
+
+        /* Special Toggle Button Style */
+        .toggle-btn {
+            background: #333;
+            border: 1px solid #555;
+            text-align: center;
+            font-size: 13px;
+            padding: 8px 10px;
+            margin-top: 5px;
+        }
         .toggle-btn:hover { background: #444; }
-        .right-panel { position: absolute; top: 15px; right: 15px; z-index: 9999; width: 280px; display: flex; flex-direction: column; gap: 15px; }
-        .info-box { background: rgba(0, 0, 0, 0.8); border: 1px solid #ff0000; border-radius: 6px; padding: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .box-header { color: #ff0000; font-size: 14px; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; margin-bottom: 8px; }
-        .marquee-box { width: 100%; overflow: hidden; white-space: nowrap; box-sizing: border-box; }
-        .marquee-text { display: inline-block; padding-left: 100%; animation: marqueeEffect 22s linear infinite; color: #fff; font-size: 13px; }
-        @keyframes marqueeEffect { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
-        .ai-content { color: #00ffcc; font-size: 13px; line-height: 1.4; min-height: 50px; }
+
+        /* Right Column: Animated Notice/Update Box */
+        .notice-container {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 9999;
+            width: 280px;
+            background: rgba(0, 0, 0, 0.75);
+            border: 1px solid #ff0000;
+            border-radius: 6px;
+            padding: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: block; /* Default thakbe, toggle button diye control hobe */
+        }
+
+        .notice-header {
+            color: #ff0000;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 4px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Continuous Text Animation Effect */
+        .marquee-box {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+
+        .marquee-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marqueeEffect 12s linear infinite;
+            color: #fff;
+            font-size: 13px;
+        }
+
+        @keyframes marqueeEffect {
+            0%   { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+        
         .player-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
         iframe { width: 100%; height: 100%; border: none; }
     </style>
@@ -26,21 +113,15 @@
 <body>
 
     <div class="left-panel">
-        <div class="channel-group" id="buttonArea"></div>
-        <button class="toggle-btn" onclick="toggleRightPanel()">💬 Widgets: ON</button>
+        <div class="channel-group" id="buttonArea">
+            </div>
+        <button class="toggle-btn" onclick="toggleNotice()">💬 Text: ON</button>
     </div>
 
-    <div class="right-panel" id="rightSidebar">
-        <div class="info-box">
-            <div class="box-header">🔔 Live Update:</div>
-            <div class="marquee-box">
-                <div class="marquee-text">Welcome to My Live TV! Stream Online. Enjoy high quality streaming without buffer.</div>
-            </div>
-        </div>
-
-        <div class="info-box" style="border-color: #00ffcc;">
-            <div class="box-header" style="color: #00ffcc;">🤖 Live Summary:</div>
-            <div class="ai-content" id="aiSummaryBox">চ্যানেল সিলেক্ট করলে লাইভ আপডেট এখানে দেখাবে...</div>
+    <div class="notice-container" id="noticeBoard">
+        <div class="notice-header">🔔 Live Update:</div>
+        <div class="marquee-box">
+            <div class="marquee-text">Welcome to My Live TV! Stream Online. Keep updating your channel tokens regularly if they expire. Enjoy high quality streaming without buffer.</div>
         </div>
     </div>
 
@@ -49,9 +130,9 @@
     </div>
 
     <script>
+        // Channel Data List
         const channels = [
-            
-           		{
+            		{
                 name: "Asian TV",
                 url: "http://172.19.178.39:18190/asian_tv/embed.html?token=5102cdf9a1c1e2b3865dea504e4ee2c5488e855a-c20fda493fcfdb231c748a006ba09d21-1782849380-1782838280&autoplay=false&mute=true"
             },
@@ -80,13 +161,7 @@
 
        	 ];
 
-        // লোকাল বাংলা সামারি ডেটা
-        const scheduleData = {
-            "Asian TV": "📺 এশিয়ান টিভি লাইভ: এখন সম্প্রচারিত হচ্ছে নিয়মিত নাটক ও বিনোদনমূলক অনুষ্ঠান। চমৎকার সাউন্ড ও ভিডিও কোয়ালিটিতে উপভোগ করুন।",
-            "ATN Bangla": "📺 এটি延 বাংলা লাইভ: বর্তমানে চলমান রয়েছে বিশেষ টকশো এবং সর্বশেষ সংবাদ আপডেট। চোখ রাখুন সমসাময়িক ঘটনার বিস্তারিত জানতে।",
-            "T Sports Live": "⚽ টি স্পোর্টস লাইভ: মাঠে চলছে ধামাকা ফুটবল টুর্নামেন্টের উত্তেজনাপূর্ণ ম্যাচ! সরাসরি লাইভ স্কোর এবং অ্যাকশন উপভোগ করুন কোনো বাফারিং ছাড়াই।"
-        };
-
+        // Channel Button Script
         const buttonArea = document.getElementById('buttonArea');
         const tvPlayer = document.getElementById('tvPlayer');
 
@@ -97,27 +172,26 @@
                 document.querySelectorAll('.channel-group button').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 tvPlayer.src = channel.url;
-                
-                // ইনস্ট্যান্ট লোড
-                document.getElementById('aiSummaryBox').innerText = scheduleData[channel.name] || "লাইভ অনুষ্ঠান সম্প্রচারিত হচ্ছে।";
             };
             buttonArea.appendChild(btn);
         });
 
-        function toggleRightPanel() {
-            const sidebar = document.getElementById('rightSidebar');
+        // Right side Text Animation On/Off korar function
+        function toggleNotice() {
+            const noticeBoard = document.getElementById('noticeBoard');
             const toggleBtn = document.querySelector('.toggle-btn');
             
-            if (sidebar.style.display === 'none') {
-                sidebar.style.display = 'flex';
-                toggleBtn.innerText = "💬 Widgets: ON";
+            if (noticeBoard.style.display === 'none') {
+                noticeBoard.style.display = 'block';
+                toggleBtn.innerText = "💬 Text: ON";
                 toggleBtn.style.background = "#333";
             } else {
-                sidebar.style.display = 'none';
-                toggleBtn.innerText = "🔇 Widgets: OFF";
+                noticeBoard.style.display = 'none';
+                toggleBtn.innerText = "🔇 Text: OFF";
                 toggleBtn.style.background = "#552222";
             }
         }
     </script>
+
 </body>
 </html>
